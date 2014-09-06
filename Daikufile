@@ -1,0 +1,2 @@
+# fatpack-simple is available at https://github.com/shoichikaji/App-FatPacker-Simple
+task default => sub { sh qw(fatpack-simple -o dirdiff bin/dirdiff) };

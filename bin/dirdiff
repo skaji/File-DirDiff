@@ -1,0 +1,57 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use utf8;
+use File::DirDiff;
+use Pod::Usage 'pod2usage';
+sub say { print @_, "\n" }
+pod2usage(1) if !@ARGV || $ARGV[0] =~ /^(-h|--help)$/;
+my $dir = shift;
+die "'$dir' is not a directory\n" unless -d $dir;
+
+my @command = @ARGV or pod2usage(1);
+
+my $watcher = File::DirDiff->new(dir => $dir);
+my $status = system {$ARGV[0]} @ARGV;
+
+my $D = $ENV{NO_COLOR} ? "D" : "\e[31mD\e[m";
+my $A = $ENV{NO_COLOR} ? "A" : "\e[32mA\e[m";
+my $M = $ENV{NO_COLOR} ? "M" : "\e[33mM\e[m";
+
+$watcher->diff(sub {
+    my ($old, $new) = @_;
+    if (!$new) {
+        say "$D $old->{name}";
+    } elsif (!$old) {
+        say "$A $new->{name}";
+    } else {
+        say "$M $old->{name}";
+    }
+});
+
+if ($status == 0) {
+    exit 0;
+} else {
+    my $code = ($status >> 8) || 255;
+    exit $code;
+}
+
+__END__
+
+=head1 NAME
+
+dirdiff - report directory diff after some command execution
+
+=head1 SYNOPSIS
+
+    > dirdiff DIRECTORY COMMANDS
+
+    Eg:
+        > dirdiff ./local cpanm -Llocal Plack
+        > dirdiff $HOME/local bash -c "./configure --prefix=$HOME/local && make install"
+
+=head1 AUTHOR
+
+Shoichi Kaji
+
+=cut

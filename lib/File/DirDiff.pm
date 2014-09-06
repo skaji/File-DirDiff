@@ -16,10 +16,10 @@ sub new {
     $self;
 }
 
-sub _wanted {
+sub _find {
     my $self = shift;
-    my $result = shift or die;
-    return sub {
+    my $result = {};
+    my $wanted = sub {
         my $name = $File::Find::name;
         my $type = -l $name ? "symlink"
                  : -f $name ? "file"
@@ -35,22 +35,20 @@ sub _wanted {
             ( $symlink ? (symlink => $symlink) : () ),
         };
     };
+    find { wanted => $wanted, no_chdir => 1 }, $self->{dir};
+    return $result;
 }
 
 sub init {
     my $self = shift;
     delete $self->{$_} for qw(before after);
-    my $before = {};
-    find $self->_wanted($before), $self->{dir};
-    $self->{before} = $before;
+    $self->{before} = $self->_find;
 }
 
 sub diff {
     my ($self, $cb) = @_;
     my $before = $self->{before} or die;
-    my $after = {};
-    find $self->_wanted($after), $self->{dir};
-    $self->{after} = $after;
+    my $after = $self->{after} = $self->_find;
 
     my %seen;
     for my $name (sort keys %$before) {
@@ -108,9 +106,23 @@ File::DirDiff - get diff of a directory between two periods
 
 File::DirDiff allows you to get the differences of a directory between two periods.
 
+L<dirdiff|https://github.com/shoichikaji/File-DirDiff/blob/master/bin/dirdiff>
+script, which reports the specified direcoty diff after some command execution,
+is available:
+
+    > wget https://raw.githubusercontent.com/shoichikaji/File-DirDiff/master/dirdiff
+    > chmod +x dirdiff
+
+    # eg:
+    > ./dirdiff $HOME/local bash -c "./configure --prefix=$HOME/local && make install"
+    ...
+    A /home/skaji/local/bin/hoge
+    M /home/skaji/local/bin/foo
+    A /home/skaji/local/lib/libhoge.so
+
 =head1 LIMITATION
 
-On some system (eg: Mac OS X) does not support milli second mtime.
+Some system (eg: Mac OS X) does not support milli second mtime.
 Then this module cannot detect the file modification within a second.
 
 =head1 SEE ALSO

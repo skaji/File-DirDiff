@@ -28,9 +28,23 @@ File::DirDiff - get diff of a directory between two periods
 
 File::DirDiff allows you to get the differences of a directory between two periods.
 
+[dirdiff](https://github.com/shoichikaji/File-DirDiff/blob/master/bin/dirdiff)
+script, which reports the specified direcoty diff after some command execution,
+is available:
+
+    > wget https://raw.githubusercontent.com/shoichikaji/File-DirDiff/master/dirdiff
+    > chmod +x dirdiff
+
+    # eg:
+    > ./dirdiff $HOME/local bash -c "./configure --prefix=$HOME/local && make install"
+    ...
+    A /home/skaji/local/bin/hoge
+    M /home/skaji/local/bin/foo
+    A /home/skaji/local/lib/libhoge.so
+
 # LIMITATION
 
-On some system (eg: Mac OS X) does not support milli second mtime.
+Some system (eg: Mac OS X) does not support milli second mtime.
 Then this module cannot detect the file modification within a second.
 
 # SEE ALSO
