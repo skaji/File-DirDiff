@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use File::Find 'find';
 use Time::HiRes ();
+use constant HAS_TIME_HIRES_LSTAT => eval { Time::HiRes->VERSION(1.9726); 1 };
 
 our $VERSION = "0.01";
 
@@ -25,8 +26,17 @@ sub _find {
                  : -f $name ? "file"
                  : -d $name ? "dir"
                  :            "unknown";
-        my $mtime = $type eq "symlink" ? (Time::HiRes::lstat $name)[9]
-                  :                      (Time::HiRes::stat  $name)[9];
+        my $mtime = do {
+            if ($type eq "symlink") {
+                if (HAS_TIME_HIRES_LSTAT) {
+                    ( Time::HiRes::lstat($name) )[9];
+                } else {
+                    ( lstat($name) )[9];
+                }
+            } else {
+                ( Time::HiRes::stat($name) )[9];
+            }
+        };
         my $symlink = $type eq "symlink" ? readlink $name : undef;
         $result->{$name} = {
             name => $name,
