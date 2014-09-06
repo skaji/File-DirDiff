@@ -91,8 +91,8 @@ dirdiff - report directory diff after some command execution
     > dirdiff DIRECTORY COMMANDS
 
     Eg:
-        > dirdiff ./local cpanm -Llocal Plack
-        > dirdiff $HOME/local bash -c "./configure --prefix=$HOME/local && make install"
+    > dirdiff ./local cpanm -Llocal Plack
+    > dirdiff $HOME/local bash -c "./configure --prefix=$HOME/local && make install"
 
 =head1 AUTHOR
 
